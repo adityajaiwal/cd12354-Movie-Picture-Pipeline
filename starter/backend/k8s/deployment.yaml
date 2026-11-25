@@ -1,21 +1,64 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: backend
+#   labels:
+#     app: backend
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: backend
+#   template:
+#     metadata:
+#       labels:
+#         app: backend
+#     spec:
+#       containers:
+#         - name: backend
+#           image: backend
+#           ports:
+#             - containerPort: 5000
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: movie-backend
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: movie-backend
+#   template:
+#     metadata:
+#       labels:
+#         app: movie-backend
+#     spec:
+#       containers:
+#         - name: movie-backend
+#           image: movie-backend:latest
+#           imagePullPolicy: IfNotPresent
+#           ports:
+#             - containerPort: 5000
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
-  labels:
-    app: backend
+  name: movie-backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: movie-backend
   template:
     metadata:
       labels:
-        app: backend
+        app: movie-backend
     spec:
       containers:
-        - name: backend
-          image: backend
+        - name: movie-backend
+          image: movie-backend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000

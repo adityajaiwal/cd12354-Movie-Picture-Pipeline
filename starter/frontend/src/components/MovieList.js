@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
@@ -11,19 +10,13 @@ function MovieList({ onMovieClick }) {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_MOVIE_API_URL}/movies`
-        );
+        const response = await axios.get(`${process.env.REACT_APP_MOVIE_API_URL}/movies`);
 
         console.log('Movie API response:', response.data);
 
         const data = response.data;
 
-        const movieList = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.movies)
-            ? data.movies
-            : [];
+        const movieList = Array.isArray(data) ? data : Array.isArray(data?.movies) ? data.movies : [];
 
         setMovies(movieList);
       } catch (err) {
@@ -52,11 +45,7 @@ function MovieList({ onMovieClick }) {
   return (
     <ul>
       {movies.map((movie) => (
-        <li
-          className="movieItem"
-          key={movie.id}
-          onClick={() => onMovieClick(movie)}
-        >
+        <li className="movieItem" key={movie.id} onClick={() => onMovieClick(movie)}>
           {movie.title}
         </li>
       ))}

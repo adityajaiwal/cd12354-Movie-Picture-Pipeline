@@ -107,7 +107,7 @@ The backend CI workflow performs:
 The frontend CI workflow performs:
 
 1. Checkout repository.
-2. Set up Node.js 18.
+2. Set up Node.js.
 3. Install dependencies using npm.
 4. Run ESLint.
 5. Execute frontend tests.
@@ -134,7 +134,7 @@ The frontend CD workflow performs:
 3. Configure AWS credentials using GitHub OIDC.
 4. Authenticate with Amazon ECR.
 5. Build the frontend Docker image.
-6. Push the frontend image to Amazon ECR.
+6. Push the image to Amazon ECR.
 7. Update Kubernetes configuration.
 8. Deploy the frontend image to Amazon EKS.
 9. Verify deployment rollout status.
@@ -146,7 +146,7 @@ The project uses the following AWS services:
 - **Amazon ECR:** Stores frontend and backend Docker images.
 - **Amazon EKS:** Manages the Kubernetes cluster.
 - **AWS IAM:** Provides access management and permissions.
-- **AWS Elastic Load Balancing:** Exposes frontend and backend services publicly.
+- **AWS LoadBalancer:** Exposes frontend and backend services publicly.
 
 **AWS Region:** `us-east-1`
 
@@ -162,7 +162,7 @@ The backend provides a REST API endpoint to retrieve movie information.
 
 **HTTP Method:** GET
 
-**API Endpoint:**
+**Endpoint:**
 
 ```text
 /movies
@@ -193,24 +193,17 @@ http://a13570bdc57024ba5b27d75ab910533a-111264564.us-east-1.elb.amazonaws.com/mo
 }
 ```
 
-### API Testing Results
+### Backend API Response Screenshot
 
-The backend API was successfully tested using AWS CloudShell and Windows Command Prompt.
+![Backend API Response](screenshots/backend-api-response.png)
 
-**Verified HTTP Response:**
+### HTTP 200 OK Verification
 
-```text
-HTTP/1.1 200 OK
-Content-Type: application/json
-```
-
-The API returned the expected JSON response containing all three movies.
-
-**Important:** The backend application exposes the `/movies` endpoint. Opening the backend LoadBalancer root URL without `/movies` returns `404 Not Found` because a root route is not configured. This does not indicate that the API is down.
+![Backend API HTTP 200](screenshots/backend-api-http-200.png)
 
 ## 8. Live Application
 
-The application was deployed through separate AWS LoadBalancer endpoints.
+The application is deployed through AWS LoadBalancer endpoints.
 
 ### Frontend Application
 
@@ -218,19 +211,25 @@ The application was deployed through separate AWS LoadBalancer endpoints.
 
 http://a2447188c077f4f8fb81950dda9225a9-148796412.us-east-1.elb.amazonaws.com
 
-The React frontend successfully displays the following movies:
+The frontend displays the following movies:
 
 1. Top Gun: Maverick
 2. Sonic the Hedgehog
 3. A Quiet Place
 
-### Backend REST API
+### Frontend Application Screenshot
+
+![Movie List Application](screenshots/frontend-movie-list.png)
+
+### Backend API
 
 **URL:**
 
 http://a13570bdc57024ba5b27d75ab910533a-111264564.us-east-1.elb.amazonaws.com/movies
 
 The backend API returns movie information in JSON format.
+
+**Note:** Use the `/movies` endpoint to retrieve the movie list. The backend root URL (`/`) is not the movie API endpoint.
 
 ## 9. Kubernetes Verification
 
@@ -266,47 +265,56 @@ kubectl get deployments -A
 kubectl get svc movie-backend -n default
 ```
 
-### Check Frontend Service
-
-```bash
-kubectl get svc frontend -n default
-```
-
 ### Test Backend API
 
 ```bash
-curl -i http://a13570bdc57024ba5b27d75ab910533a-111264564.us-east-1.elb.amazonaws.com/movies
-```
-
-### Verify Backend LoadBalancer DNS
-
-```bash
-kubectl get svc movie-backend -n default -o wide
+curl -i http://BACKEND-LOADBALANCER-DNS/movies
 ```
 
 The backend API returned an HTTP 200 OK response with the expected movie information.
 
-## 10. Deployment Results
+## 10. GitHub Actions Execution Results
+
+All four CI/CD workflows have successfully executed.
+
+### GitHub Actions Workflows
+
+![GitHub Actions Workflows](screenshots/github-actions-workflows.png)
+
+### Backend CI Success
+
+![Backend CI Success](screenshots/backend-ci-success.png)
+
+### Frontend CI Success
+
+![Frontend CI Success](screenshots/frontend-ci-success.png)
+
+### Backend CD Success
+
+![Backend CD Success](screenshots/backend-cd-success.png)
+
+### Frontend CD Success
+
+![Frontend CD Success](screenshots/frontend-cd-success.png)
+
+## 11. Deployment Results
 
 The following project milestones were successfully completed:
 
 - Frontend Docker image built successfully.
 - Backend Docker image built successfully.
 - Docker images pushed to Amazon ECR.
-- Frontend deployed on Amazon EKS.
-- Backend deployed on Amazon EKS.
+- Frontend deployed successfully on Amazon EKS.
+- Backend deployed successfully on Amazon EKS.
 - Frontend and backend LoadBalancer services created.
 - Backend API successfully tested using AWS CloudShell.
 - Backend API successfully accessed from Windows Command Prompt.
 - DNS resolution verified using Google DNS.
 - Frontend successfully connected to the backend API.
 - Movie list displayed successfully in the browser.
-- Backend CI workflow executed successfully.
-- Frontend CI workflow executed successfully.
-- Backend CD workflow executed successfully.
-- Frontend CD workflow executed successfully.
+- All four latest CI/CD workflow runs passed.
 
-## 11. Repository Structure
+## 12. Repository Structure
 
 ```text
 cd12354-Movie-Picture-Pipeline/
@@ -317,6 +325,16 @@ cd12354-Movie-Picture-Pipeline/
 │       ├── backend-ci.yaml
 │       ├── frontend-cd.yaml
 │       └── frontend-ci.yaml
+│
+├── screenshots/
+│   ├── backend-api-http-200.png
+│   ├── backend-api-response.png
+│   ├── backend-cd-success.png
+│   ├── backend-ci-success.png
+│   ├── frontend-cd-success.png
+│   ├── frontend-ci-success.png
+│   ├── frontend-movie-list.png
+│   └── github-actions-workflows.png
 │
 ├── starter/
 │   ├── backend/
@@ -336,33 +354,19 @@ cd12354-Movie-Picture-Pipeline/
 └── README.md
 ```
 
-*Note: This represents the main project structure. Additional application files and configuration files are present in the repository.*
+## 13. Conclusion
 
-## 12. Conclusion
-
-The Movie Picture Pipeline project demonstrates a complete DevOps deployment workflow using AWS, Docker, Kubernetes, Amazon ECR, Amazon EKS, and GitHub Actions.
+The Movie Picture Pipeline project demonstrates an end-to-end DevOps deployment workflow using AWS, Docker, Kubernetes, Amazon ECR, Amazon EKS, and GitHub Actions.
 
 The project successfully automates application validation, Docker image creation, image management, and Kubernetes deployments.
 
 Both frontend and backend services were deployed on Amazon EKS and exposed through AWS LoadBalancers.
 
-The backend REST API successfully returned the expected movie information, and the React frontend displayed the movie list in the browser.
+The backend REST API returned the expected movie information, and the React frontend successfully displayed the movie list in the browser.
 
-This project demonstrates practical experience with:
-
-- Cloud infrastructure using AWS.
-- Containerization using Docker.
-- Container orchestration using Kubernetes.
-- CI/CD automation using GitHub Actions.
-- Container image management using Amazon ECR.
-- Application deployment using Amazon EKS.
-- Secure AWS authentication using GitHub OIDC.
+This project demonstrates practical experience with cloud infrastructure, containerization, Kubernetes orchestration, CI/CD automation, and AWS deployment.
 
 ---
-
-## Project Information
-
-**Project Name:** Movie Picture Pipeline
 
 **Project Status:** Successfully Completed
 
@@ -370,12 +374,8 @@ This project demonstrates practical experience with:
 
 **AWS Region:** us-east-1
 
-**Kubernetes Cluster:** cluster
-
-**Deployment Platform:** Amazon EKS
+**Deployment:** Amazon EKS
 
 **Container Registry:** Amazon ECR
 
 **CI/CD:** GitHub Actions
-
-**Version Control:** Git and GitHub

@@ -2,48 +2,54 @@
 
 ## 1. Project Overview
 
-Movie Picture Pipeline is a containerized, cloud-deployed application that displays a list of movies through a React frontend and a backend REST API.
+Movie Picture Pipeline is a containerized, cloud-deployed application that displays a list of movies through a React frontend and a Python backend REST API.
 
-The project demonstrates automated CI/CD, Docker containerization, Amazon ECR image management, and Kubernetes deployment using Amazon EKS.
+The project demonstrates an end-to-end DevOps workflow using Docker, Kubernetes, Amazon Web Services (AWS), Amazon Elastic Kubernetes Service (EKS), Amazon Elastic Container Registry (ECR), and GitHub Actions.
+
+The application is deployed on AWS EKS, with separate frontend and backend services exposed through AWS LoadBalancers.
 
 ## 2. Project Architecture
 
 ```text
-              Developer
-                  |
-                  v
-              GitHub
-                  |
-                  v
-          GitHub Actions
-                  |
-          +-------+-------+
-          |               |
-       Backend          Frontend
-          CI/CD           CI/CD
-          |               |
-          v               v
-       Docker           Docker
-          |               |
-          +-------+-------+
-                  |
-                  v
-             Amazon ECR
-                  |
-                  v
-              Amazon EKS
-                  |
-          +-------+-------+
-          |               |
-       Backend          Frontend
-       Service          Service
-          |               |
-          +-------+-------+
-                  |
-             LoadBalancer
-                  |
-                  v
-             Web Browser
+                   Developer
+                       |
+                       v
+                    GitHub
+                       |
+                       v
+                GitHub Actions
+                       |
+             +---------+---------+
+             |                   |
+         Backend               Frontend
+           CI/CD                 CI/CD
+             |                   |
+             v                   v
+        Docker Build        Docker Build
+             |                   |
+             v                   v
+        Amazon ECR           Amazon ECR
+             |                   |
+             +---------+---------+
+                       |
+                       v
+                  Amazon EKS
+                       |
+              +--------+--------+
+              |                 |
+          Backend             Frontend
+         Deployment          Deployment
+              |                 |
+          Backend             Frontend
+           Service             Service
+              |                 |
+          LoadBalancer       LoadBalancer
+              |                 |
+              v                 v
+         Backend API        Web Browser
+              ^
+              |
+         React Frontend
 ```
 
 ## 3. Technologies Used
@@ -51,7 +57,7 @@ The project demonstrates automated CI/CD, Docker containerization, Amazon ECR im
 | Category | Technology |
 |---|---|
 | Frontend | React.js, JavaScript |
-| Backend | Python |
+| Backend | Python, Flask |
 | Containerization | Docker |
 | Container Registry | Amazon ECR |
 | Orchestration | Kubernetes |
@@ -63,50 +69,110 @@ The project demonstrates automated CI/CD, Docker containerization, Amazon ECR im
 
 ## 4. Project Features
 
-- Display a list of movies.
+- Display a list of movies through a React frontend.
 - Fetch movie information from the backend REST API.
-- Connect the React frontend with the backend.
+- Connect the frontend with the backend.
 - Build Docker images for frontend and backend.
 - Push Docker images to Amazon ECR.
 - Deploy containers on Amazon EKS.
-- Expose applications through Kubernetes LoadBalancer services.
-- Automate builds and deployments using GitHub Actions.
+- Expose frontend and backend through Kubernetes LoadBalancer services.
+- Automate frontend and backend builds using GitHub Actions.
+- Automate deployments using GitHub Actions.
+- Authenticate GitHub Actions with AWS using OpenID Connect (OIDC).
 
 ## 5. CI/CD Workflows
 
-The project contains four GitHub Actions workflows:
+The repository contains four GitHub Actions workflows.
 
 | Workflow | Purpose |
 |---|---|
-| Backend CI | Backend build and validation |
-| Backend CD | Build and deploy backend |
-| Frontend CI | Frontend build and validation |
-| Frontend CD | Build and deploy frontend |
+| Backend CI | Backend linting, testing and Docker image build |
+| Backend CD | Backend Docker image build and deployment |
+| Frontend CI | Frontend linting and testing |
+| Frontend CD | Frontend validation, Docker image build and deployment |
 
-The deployment workflows use AWS IAM OIDC authentication to obtain AWS credentials without storing long-lived AWS access keys in GitHub.
+### Backend Continuous Integration
+
+The backend CI workflow performs:
+
+1. Checkout repository.
+2. Set up Python 3.10.
+3. Install backend dependencies using Pipenv.
+4. Run Flake8 for code quality.
+5. Execute backend tests using Pytest.
+6. Build the backend Docker image.
+
+### Frontend Continuous Integration
+
+The frontend CI workflow performs:
+
+1. Checkout repository.
+2. Set up Node.js 18.
+3. Install dependencies using npm.
+4. Run ESLint.
+5. Execute frontend tests.
+
+### Backend Continuous Deployment
+
+The backend CD workflow performs:
+
+1. Checkout repository.
+2. Configure AWS credentials using GitHub OIDC.
+3. Authenticate with Amazon ECR.
+4. Build the backend Docker image.
+5. Push the image to Amazon ECR.
+6. Update Kubernetes configuration.
+7. Deploy the backend image to Amazon EKS.
+8. Verify deployment rollout status.
+
+### Frontend Continuous Deployment
+
+The frontend CD workflow performs:
+
+1. Checkout repository.
+2. Run frontend linting and testing.
+3. Configure AWS credentials using GitHub OIDC.
+4. Authenticate with Amazon ECR.
+5. Build the frontend Docker image.
+6. Push the image to Amazon ECR.
+7. Update Kubernetes configuration.
+8. Deploy the frontend image to Amazon EKS.
+9. Verify deployment rollout status.
 
 ## 6. AWS Infrastructure
 
-The project uses:
+The project uses the following AWS services:
 
-- Amazon ECR for storing Docker images.
-- Amazon EKS for Kubernetes cluster management.
-- AWS IAM for access management.
-- AWS LoadBalancer services for application access.
+- **Amazon ECR:** Stores frontend and backend Docker images.
+- **Amazon EKS:** Manages the Kubernetes cluster.
+- **AWS IAM:** Provides access management and permissions.
+- **AWS LoadBalancer:** Exposes frontend and backend services publicly.
 
-**AWS Region:** us-east-1
+**AWS Region:** `us-east-1`
 
-**Kubernetes Cluster:** cluster
+**Kubernetes Cluster:** `cluster`
+
+**Kubernetes Namespace:** `default`
+
+**Authentication:** GitHub Actions OIDC with AWS IAM Role.
 
 ## 7. Application API
 
-The backend provides a movies endpoint:
+The backend provides a REST API endpoint to retrieve movie information.
+
+**HTTP Method:** GET
+
+**Endpoint:**
 
 ```text
-GET /movies
+/movies
 ```
 
-Example response:
+**Backend API URL:**
+
+http://a13570bdc57024ba5b27d75ab910533a-111264564.us-east-1.elb.amazonaws.com/movies
+
+### Example API Response
 
 ```json
 {
@@ -127,45 +193,88 @@ Example response:
 }
 ```
 
-## 8. Kubernetes Verification
+## 8. Live Application
 
-The following commands were used to verify the deployment:
+The application is deployed and accessible through AWS LoadBalancer endpoints.
 
-```bash
-kubectl get nodes
+### Frontend Application
 
-kubectl get pods -A
+**URL:**
 
-kubectl get services -A
-
-kubectl get deployments -A
-```
-
-The frontend and backend deployments were verified as ready, with their pods running successfully.
-
-## 9. Deployment Results
-
-The project achieved the following results:
-
-- Frontend Docker image built successfully.
-- Backend Docker image built successfully.
-- Images pushed to Amazon ECR.
-- Frontend deployed successfully on Amazon EKS.
-- Backend deployed successfully on Amazon EKS.
-- Frontend successfully connected to the backend API.
-- Movie list displayed successfully in the browser.
-- All four latest CI/CD workflow runs passed.
-
-## 10. Live Application
-
-**Frontend:**  
 http://a2447188c077f4f8fb81950dda9225a9-148796412.us-east-1.elb.amazonaws.com
 
-The deployed website successfully displays:
+The frontend displays the following movies:
 
 1. Top Gun: Maverick
 2. Sonic the Hedgehog
 3. A Quiet Place
+
+### Backend API
+
+**URL:**
+
+http://a13570bdc57024ba5b27d75ab910533a-111264564.us-east-1.elb.amazonaws.com/movies
+
+The backend API returns movie information in JSON format.
+
+## 9. Kubernetes Verification
+
+The following commands were used to verify the Kubernetes deployment.
+
+### Check Kubernetes Nodes
+
+```bash
+kubectl get nodes
+```
+
+### Check Running Pods
+
+```bash
+kubectl get pods -A
+```
+
+### Check Kubernetes Services
+
+```bash
+kubectl get services -A
+```
+
+### Check Deployments
+
+```bash
+kubectl get deployments -A
+```
+
+### Check Backend Service
+
+```bash
+kubectl get svc movie-backend -n default
+```
+
+### Test Backend API
+
+```bash
+curl -i http://BACKEND-LOADBALANCER-DNS/movies
+```
+
+The backend API was successfully tested and returned an HTTP 200 OK response.
+
+## 10. Deployment Results
+
+The following project milestones were successfully completed:
+
+- Frontend Docker image built successfully.
+- Backend Docker image built successfully.
+- Docker images pushed to Amazon ECR.
+- Frontend deployed successfully on Amazon EKS.
+- Backend deployed successfully on Amazon EKS.
+- Frontend and backend LoadBalancer services created.
+- Backend API successfully tested using CloudShell.
+- Backend API successfully accessed from Windows Command Prompt.
+- DNS resolution verified using Google DNS.
+- Frontend successfully connected to the backend API.
+- Movie list displayed successfully in the browser.
+- GitHub Actions CI/CD workflows executed successfully.
 
 ## 11. Repository Structure
 
@@ -174,30 +283,47 @@ cd12354-Movie-Picture-Pipeline/
 │
 ├── .github/
 │   └── workflows/
-│       ├── backend-ci.yml
 │       ├── backend-cd.yml
-│       ├── frontend-ci.yml
-│       └── frontend-cd.yml
+│       ├── backend-ci.yaml
+│       ├── frontend-cd.yaml
+│       └── frontend-ci.yaml
 │
 ├── starter/
 │   ├── backend/
 │   │   ├── k8s/
-│   │   └── Dockerfile
+│   │   ├── Dockerfile
+│   │   └── application files
 │   │
 │   └── frontend/
 │       ├── k8s/
 │       ├── src/
-│       └── Dockerfile
+│       ├── Dockerfile
+│       └── application files
 │
+├── .gitignore
+├── CODEOWNERS
+├── LICENSE.md
 └── README.md
 ```
 
-*Note: This is the main project structure; additional application files and configuration files are present in the repository.*
-
 ## 12. Conclusion
 
-The Movie Picture Pipeline project demonstrates an end-to-end DevOps workflow using AWS, Docker, Kubernetes, and GitHub Actions.
+The Movie Picture Pipeline project demonstrates a complete DevOps deployment workflow using AWS, Docker, Kubernetes, Amazon ECR, Amazon EKS, and GitHub Actions.
 
-It successfully automates application builds and deployments, manages container images through Amazon ECR, and runs frontend and backend services on Amazon EKS.
+The project successfully automates application validation, Docker image creation, image management, and Kubernetes deployments.
 
-The final application was tested through its public LoadBalancer endpoint, and the movie list was displayed successfully.
+Both frontend and backend services were deployed successfully on Amazon EKS and exposed through AWS LoadBalancers.
+
+The backend REST API returned the expected movie information, and the React frontend successfully displayed the movie list in the browser.
+
+This project demonstrates practical experience with cloud infrastructure, containerization, Kubernetes orchestration, CI/CD automation, and AWS deployment.
+
+---
+
+**Project Status:** Successfully Completed
+
+**Cloud Platform:** Amazon Web Services (AWS)
+
+**Deployment:** Amazon EKS
+
+**CI/CD:** GitHub Actions
